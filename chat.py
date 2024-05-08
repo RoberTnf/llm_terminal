@@ -45,7 +45,9 @@ def build_template_from_history(history: List[Dict[str, str]], prompt) -> str:
     """
     Builds template in llama format with files and history
     """
-    template = "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nYou are a helpful assistant. The user is interested in linux, archlinux, python or other programming languages. Try to give short answers, unless the questions asks for details."
+    with open("system_prompt.txt", "r") as fp:
+        system_prompt = fp.read()
+    template = f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system_prompt}"
     for h in history:
         role, msg = h["role"], h["msg"]
         template += f"<|eot_id|><|start_header_id|>{role}<|end_header_id|>\n\n{msg}"
