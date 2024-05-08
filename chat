@@ -1,0 +1,5 @@
+#!/bin/env bash
+# set -x
+d=$(dirname "$(readlink -f "$0")")
+source $d/.env_export
+$(cd $d && poetry env info -p)/bin/python $d/chat.py "$@"
