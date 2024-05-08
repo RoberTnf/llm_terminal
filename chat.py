@@ -5,18 +5,35 @@ python chat.py --help
 """
 
 import glob
+import subprocess
+import sys
 from typing import Dict, List
 
 import click
 import replicate
 
 
+def create_commit_message():
+    process = subprocess.run(["git diff --cached"], shell=True, stdout=subprocess.PIPE)
+    if process.returncode != 0:
+        raise ValueError("git diff failed")
+    if len(process.stdout) == 0:
+        raise ValueError("Empty diff")
+    
+    response = ask(prompt=f"Generate a detailed commit message, and only a commit message without extra text. First line should be a really short title. \n{process.stdout}", history=[])
+
+    subprocess.run(["git", "commit", "-e", "-m", f"{response}"], stdin=sys.stdin )
+
 @click.command()
 @click.option("-f", "--files", help="Regex for files", default=[], multiple=True)
+@click.option("--commit", "-c", is_flag=True, help="Generate commit message")
 @click.argument("text", nargs=-1)
-def main(files: List[str], text: List[str]) -> None:
+def main(files: List[str], text: List[str], commit: bool) -> None:
     fnames = []
     history = []
+    if commit:
+        create_commit_message()
+        return
     for file in files:
         fnames += glob.glob(file)
     for fname in fnames:
