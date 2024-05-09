@@ -7,6 +7,7 @@ python chat.py --help
 import glob
 import subprocess
 import sys
+from pathlib import Path
 from typing import Dict, List
 
 import click
@@ -20,7 +21,7 @@ def create_commit_message():
     if len(process.stdout) == 0:
         raise ValueError("Empty diff")
     
-    response = ask(prompt=f"Generate a detailed commit message, and only a commit message without extra text. First line should be a really short title. \n{process.stdout}", history=[])
+    response = ask(prompt=f"Generate a detailed commit message, and only a commit message without extra text. First line should be a really short title. Do not write anything else or use quotes.\n{process.stdout}", history=[])
 
     subprocess.run(["git", "commit", "-e", "-m", f"{response}"], stdin=sys.stdin )
 
@@ -62,7 +63,7 @@ def build_template_from_history(history: List[Dict[str, str]], prompt) -> str:
     """
     Builds template in llama format with files and history
     """
-    with open("system_prompt.txt", "r") as fp:
+    with open(Path(__file__).parent / Path("system_prompt.txt"), "r") as fp:
         system_prompt = fp.read()
     template = f"<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system_prompt}"
     for h in history:
