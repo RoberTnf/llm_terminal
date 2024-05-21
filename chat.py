@@ -12,6 +12,10 @@ from typing import Dict, List
 
 import click
 import replicate
+from datetime import datetime
+
+FILENAME =  Path.home() / Path(f"shared/chat_llm/{datetime.now().isoformat()}.txt")
+
 
 
 def create_commit_message():
@@ -39,12 +43,15 @@ def main(files: List[str], text: List[str], commit: bool) -> None:
         fnames += glob.glob(file)
     for fname in fnames:
         with open(fname, "r", encoding="utf-8") as fp:
+            msg = fp.read().replace("", "").replace("}", "\\}")
             history.append(
                 {
                     "role": "user",
-                    "msg": f"file_name: {fname}\nContent: ```{fp.read().replace("", "").replace("}", "\\}")}```",
+                    "msg": f"file_name: {fname}\nContent: ```{msg}```",
                 }
             )
+            with open(FILENAME, "a+") as fp2:
+                fp2.write(msg)
 
     if len(text) > 0:
         prompt = " ".join(text)
@@ -98,6 +105,11 @@ def ask(prompt: str, history: List[Dict[str, str]]) -> str:
         response += str(event)
 
     print()
+
+    with open(FILENAME, "a+") as fp:
+        fp.write(f"\nQ> {prompt}")
+        fp.write(f"\nA> {response}")
+
     return response
 
 
