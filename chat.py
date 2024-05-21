@@ -51,7 +51,7 @@ def main(files: List[str], text: List[str], commit: bool) -> None:
                 }
             )
             with open(FILENAME, "a+") as fp2:
-                fp2.write(msg)
+                fp2.write(f"f: {msg}")
 
     if len(text) > 0:
         prompt = " ".join(text)
