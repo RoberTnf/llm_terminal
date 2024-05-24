@@ -31,7 +31,7 @@ def create_commit_message():
 
 @click.command()
 @click.option("-f", "--files", help="Regex for files", default=[], multiple=True)
-@click.option("--commit", "-c", is_flag=True, help="Generate commit message")
+@click.option("--commit", "-c", is_flag=True, help="Generate commit message beautifuly")
 @click.argument("text", nargs=-1)
 def main(files: List[str], text: List[str], commit: bool) -> None:
     fnames = []
