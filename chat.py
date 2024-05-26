@@ -25,7 +25,7 @@ def create_commit_message():
     if len(process.stdout) == 0:
         raise ValueError("Empty diff")
     
-    response = ask(prompt=f"Generate a detailed commit message, explaining the changes. At the beginning of the commit message write a short, 10 words max, summary of the changes as a commit title. \n{process.stdout}", history=[])
+    response = ask(prompt=f"Describe the changes of this code diff, explain them as if you had written the code. Be assertive, and describe the changes as a matter of fact, don't use words like 'seem' or 'possibly'. \n{process.stdout}", history=[])
 
     subprocess.run(["git", "commit", "-e", "-m", f"{response}"], stdin=sys.stdin )
 
@@ -87,6 +87,7 @@ def ask(prompt: str, history: List[Dict[str, str]]) -> str:
     Ask and stream the response. Returns the response.
     """
     template = build_template_from_history(history, prompt)
+    print(template)
     response = ""
     print("")
     for event in replicate.stream(
