@@ -25,7 +25,7 @@ def create_commit_message():
     if len(process.stdout) == 0:
         raise ValueError("Empty diff")
     
-    response = ask(prompt=f"Generate a detailed commit message, and only a commit message without extra text. First line should be a really short title. Do not write anything else or use quotes.\n{process.stdout}", history=[])
+    response = ask(prompt=f"Generate a detailed commit message, explaining the changes. At the beginning of the commit message write a short, 10 words max, summary of the changes as a commit title. \n{process.stdout}", history=[])
 
     subprocess.run(["git", "commit", "-e", "-m", f"{response}"], stdin=sys.stdin )
 
