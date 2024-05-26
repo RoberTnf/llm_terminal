@@ -40,8 +40,10 @@ def main(files: List[str], text: List[str], commit: bool) -> None:
         create_commit_message()
         return
     for file in files:
-        fnames += glob.glob(file)
+        fnames += glob.glob(file, recursive=True)
     for fname in fnames:
+        if Path(fname).is_dir():
+            continue
         with open(fname, "r", encoding="utf-8") as fp:
             msg = fp.read().replace("", "").replace("}", "\\}")
             history.append(
