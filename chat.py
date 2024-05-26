@@ -25,7 +25,7 @@ def create_commit_message():
     if len(process.stdout) == 0:
         raise ValueError("Empty diff")
     
-    response = ask(prompt=f"Describe the changes of this code diff, explain them as if you had written the code. Be assertive, and describe the changes as a matter of fact, don't use words like 'seem' or 'possibly'. \n{process.stdout}", history=[])
+    response = ask(prompt=f"Describe the changes of this code diff, explain them as if you had written the code. Be assertive, and describe the changes as a matter of fact, don't use words like 'seem', 'possibly', 'likely' or any other word that implies uncertainty. Make the summary really brief.\n{process.stdout}", history=[])
 
     subprocess.run(["git", "commit", "-e", "-m", f"{response}"], stdin=sys.stdin )
 
@@ -89,7 +89,8 @@ def ask(prompt: str, history: List[Dict[str, str]]) -> str:
     template = build_template_from_history(history, prompt)
     print(template)
     response = ""
-    print("")
+    print(f"Q> {prompt}")
+    print("A>")
     for event in replicate.stream(
         "meta/meta-llama-3-70b-instruct",
         input={
