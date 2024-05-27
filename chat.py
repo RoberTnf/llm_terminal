@@ -25,7 +25,7 @@ def create_commit_message():
     if len(process.stdout) == 0:
         raise ValueError("Empty diff")
     
-    response = ask(prompt=f"Describe the changes of this code diff, explain them as if you had written the code. Be assertive, and describe the changes as a matter of fact, don't use words like 'seem', 'possibly', 'likely' or any other word that implies uncertainty. Make the summary really brief.\n{process.stdout}", history=[])
+    response = ask(prompt=f"Describe the changes of this git diff, explain them as if you had written the code. Be assertive, and describe the changes as a matter of fact, don't use words like 'seem', 'possibly', 'likely' or any other word that implies uncertainty. Make the summary really brief. After you have finished your message use '\n#########\n' as a separator and provide a commit message for the git diff, starting with a really short title, and following it with a detailed change description. \n{process.stdout}", history=[])
 
     subprocess.run(["git", "commit", "-e", "-m", f"{response}"], stdin=sys.stdin )
 
