@@ -14,6 +14,7 @@ from newspaper import Article
 import click
 import replicate
 from datetime import datetime
+from rich import print
 
 FILENAME =  Path.home() / Path(f"shared/chat_llm/{datetime.now().isoformat()}.txt")
 
@@ -72,13 +73,14 @@ def main(files: List[str], text: List[str], commit: bool, article: str) -> None:
     if len(text) > 0:
         prompt = " ".join(text)
     else:
-        prompt = input("> ")
+        print("[green]Q> [/green]")
+        prompt = input()
 
-    response = ask(prompt, history)
+    response = ask(prompt, history, print_prompt=True)
     while True:
         history.append({"role": "user", "msg": prompt})
         history.append({"role": "assistant", "msg": response})
-        prompt = input("\n\nQ> ")
+        prompt = input("\n\n[green]Q>[/green]")
         response = ask(prompt, history)
 
 
@@ -96,15 +98,16 @@ def build_template_from_history(history: List[Dict[str, str]], prompt) -> str:
     return template
 
 
-def ask(prompt: str, history: List[Dict[str, str]]) -> str:
+def ask(prompt: str, history: List[Dict[str, str]],print_prompt=False) -> str:
     """
     Ask and stream the response. Returns the response.
     """
     template = build_template_from_history(history, prompt)
     response = ""
-    print(template)
-    print(f"Q> {prompt}")
-    print("A>")
+    print("[dim]" + template + "[/dim]")
+    if print_prompt:
+        print(f"[green]Q>[/green] {prompt}")
+    print("[red]A>[red]")
     for event in replicate.stream(
         "meta/meta-llama-3-70b-instruct",
         input={
