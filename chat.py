@@ -9,6 +9,7 @@ import subprocess
 import sys
 from pathlib import Path
 from typing import Dict, List
+from newspaper import Article
 
 import click
 import replicate
@@ -25,15 +26,16 @@ def create_commit_message():
     if len(process.stdout) == 0:
         raise ValueError("Empty diff")
     
-    response = ask(prompt=f"Describe the changes of this git diff, explain them as if you had written the code. Be assertive, and describe the changes as a matter of fact, don't use words like 'seem', 'possibly', 'likely' or any other word that implies uncertainty. Make the summary really brief. After you have finished your message use '\n#########\n' as a separator and provide a commit message for the git diff, starting with a really short title, and following it with a detailed change description, following this template: `[COMMIT_TITLE]\n\n[COMMIT_DESCRIPTION]` and no extra formatting such as quotes or bold. \n{process.stdout}", history=[])
+    response = ask(prompt=f"Describe the changes of this git diff, explain them as if you had written the code. Be assertive, and describe the changes as a matter of fact, don't use words like 'seem', 'possibly', 'likely' or any other word that implies uncertainty. Make the summary really brief. After you have finished your message use '\n# Commit\n' as a separator and provide a commit message for the git diff, starting with a really short title, and following it with a detailed change description, following this template: `[COMMIT_TITLE]\n\n[COMMIT_DESCRIPTION]` and no extra formatting such as quotes or bold. \n{process.stdout}", history=[])
 
     subprocess.run(["git", "commit", "-e", "-m", f"{response}"], stdin=sys.stdin )
 
 @click.command()
 @click.option("-f", "--files", help="Regex for files", default=[], multiple=True)
+@click.option("-a", "--article", help="URL to article")
 @click.option("--commit", "-c", is_flag=True, help="Generate commit message beautifuly")
 @click.argument("text", nargs=-1)
-def main(files: List[str], text: List[str], commit: bool) -> None:
+def main(files: List[str], text: List[str], commit: bool, article: str) -> None:
     fnames = []
     history = []
     if commit:
@@ -42,7 +44,6 @@ def main(files: List[str], text: List[str], commit: bool) -> None:
     for file in files:
         fnames += glob.glob(file, recursive=True)
 
-    print(fnames)
     for fname in fnames:
         if Path(fname).is_dir():
             continue
@@ -56,6 +57,17 @@ def main(files: List[str], text: List[str], commit: bool) -> None:
             )
             with open(FILENAME, "a+") as fp2:
                 fp2.write(f"f: {msg}")
+
+    if article:
+        article = Article(article)
+        article.download()
+        article.parse()
+        history.append(
+                {
+                    "role": "user",
+                    "msg": f"URL: {article}, article: ```{article.text}```",
+                }
+            )
 
     if len(text) > 0:
         prompt = " ".join(text)
@@ -90,6 +102,7 @@ def ask(prompt: str, history: List[Dict[str, str]]) -> str:
     """
     template = build_template_from_history(history, prompt)
     response = ""
+    print(template)
     print(f"Q> {prompt}")
     print("A>")
     for event in replicate.stream(
