@@ -25,7 +25,7 @@ def create_commit_message():
     if len(process.stdout) == 0:
         raise ValueError("Empty diff")
     
-    response = ask(prompt=f"Generate a detailed commit message, and only a commit message without extra text. First line should be a really short title. Do not write anything else or use quotes.\n{process.stdout}", history=[])
+    response = ask(prompt=f"Describe the changes of this code diff, explain them as if you had written the code. Be assertive, and describe the changes as a matter of fact, don't use words like 'seem', 'possibly', 'likely' or any other word that implies uncertainty. Make the summary really brief.\n{process.stdout}", history=[])
 
     subprocess.run(["git", "commit", "-e", "-m", f"{response}"], stdin=sys.stdin )
 
@@ -40,8 +40,10 @@ def main(files: List[str], text: List[str], commit: bool) -> None:
         create_commit_message()
         return
     for file in files:
-        fnames += glob.glob(file)
+        fnames += glob.glob(file, recursive=True)
     for fname in fnames:
+        if Path(fname).is_dir():
+            continue
         with open(fname, "r", encoding="utf-8") as fp:
             msg = fp.read().replace("", "").replace("}", "\\}")
             history.append(
@@ -85,8 +87,10 @@ def ask(prompt: str, history: List[Dict[str, str]]) -> str:
     Ask and stream the response. Returns the response.
     """
     template = build_template_from_history(history, prompt)
+    print(template)
     response = ""
-    print("")
+    print(f"Q> {prompt}")
+    print("A>")
     for event in replicate.stream(
         "meta/meta-llama-3-70b-instruct",
         input={
