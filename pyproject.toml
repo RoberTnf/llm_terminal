@@ -12,6 +12,7 @@ click = "^8.1.7"
 transformers = "^4.40.1"
 newspaper3k = "^0.2.8"
 lxml-html-clean = "^0.1.1"
+rich = "^13.7.1"
 
 
 [tool.poetry.group.dev.dependencies]
