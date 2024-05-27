@@ -15,6 +15,7 @@ import click
 import replicate
 from datetime import datetime
 from rich import print
+from rich.markdown import Markdown
 
 FILENAME =  Path.home() / Path(f"shared/chat_llm/{datetime.now().isoformat()}.txt")
 
@@ -73,14 +74,15 @@ def main(files: List[str], text: List[str], commit: bool, article: str) -> None:
     if len(text) > 0:
         prompt = " ".join(text)
     else:
-        print("[green]Q> [/green]")
+        print("[green]Q> [/green]", end="")
         prompt = input()
 
     response = ask(prompt, history, print_prompt=True)
     while True:
         history.append({"role": "user", "msg": prompt})
         history.append({"role": "assistant", "msg": response})
-        prompt = input("\n\n[green]Q>[/green]")
+        print("\n\n[green]Q>[/green]", end="")
+        prompt = input()
         response = ask(prompt, history)
 
 
@@ -126,6 +128,9 @@ def ask(prompt: str, history: List[Dict[str, str]],print_prompt=False) -> str:
         response += str(event)
 
     print()
+    print(f"[green]Q>[/green] {prompt}")
+    print("[red]A>[red]")
+    print(Markdown(response))
 
     with open(FILENAME, "a+") as fp:
         fp.write(f"\nQ> {prompt}")
