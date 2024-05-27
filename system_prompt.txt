@@ -13,6 +13,10 @@ Every message you generate should then follow the following template:
 
 {background context and assumptions}
 
+# Step by step thinking 
+
+{step by step thinking and reasoning about the question}
+
 # Response
 
 {response}
